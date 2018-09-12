@@ -1,0 +1,149 @@
+{
+	'storage': {
+	},
+	state: '',
+	pack: {
+		pack-data: {
+			storage: {},
+			items: {
+				itemId1: {item, callback, type: add|remove|cange },
+				itemId2: {item, callback, type: add|remove|cange },
+				itemId3: {item, callback, type: add|remove|cange },
+				itemId4: {item, callback, type: add|remove|cange },
+			}
+			actions: {
+				@onAdd:    (storage, state, item) => void,
+				// @onSubAdd: (storage, state, item, subId) => void,
+				// @onParentAdd: (storage, state, item) => void,
+				@onBindedWrite: (storage, state, item, packId) => void,
+
+				@onDelete: (storage, state, item) => void,
+				// @onSubDelete: (storage, state, item) => void,
+				// @onParentDelete: (storage, state, item) => void,
+				@onBindedDelete: (storage, state, item, packId) => void,
+
+				@onEdit:    (storage, state, item) => void,
+				// @onSubEdit: (storage, state, item) => void,
+				// @onParentEdit: (storage, state, item) => void,
+				@onBindedEdit: (storage, state, item, packId) => void,
+
+				@onWrite:  (type, item, id, callback) => void,
+				// @onSubWrite: (storage, state, item) => void,
+				// @onParentWrite: (storage, state, item) => void,
+				@onBindedWrite: (storage, state, item, packId) => void,
+
+				@onChangeState:  (state, item, id) => void,
+				// @onSubChangeState: (storage, state, item) => void,
+				// @onParentChangeState: (storage, state, item) => void,
+				@onBindedChangeState: (storage, state, item, packId) => void,
+			}
+		},
+	}
+}
+
+{
+	pacId: {
+		parents: [],
+		sub: [pacId2 , pacId3],
+		binded: [pacId2 , pacId3]
+	}
+}вшшлллодолдодл
+
+.add(packId, item, callback?)
+.remove(packId, id, item, callback?)
+.edit(packId, id, item, callback?)
+
+.changeState
+.onState('finish')
+.clear()
+.setCalbback(state, storage, item)
+
+addSubscriber(pack)
+
+
+//// Что происходит при добавлении
+- 
+
+//// Когда и как выполняется callback
+////// callback(storage, state)
+- когда меняется состояние ишется все item и меняется их состояние
+- колбеки можно установить на item, можно установить на хранилише
+
+
+{
+	interface = new MzPack()
+}
+
+
+Что такое связь 
+
+1 связывается с 2
+
+при любомdadsв
+
+changeState (): boolean
+changeState -> { canChangeState() } (+)-> changeState - 
+
+
+- нужно уведомлять по изменению для любого item
+
+
+
+Любые изменения в PACK1 ( addItem, changeItem, sendItem, changeState ) -> могут передаваться в любой связанный другой PACKN
+Pack должен расширять AbstactPack
+
+
+
+Мы будем добавлять PackUnbind все для отвязки, в PackCreate для создания и связки, PackChanged изменненый (цвет или содержимое)
+
+В некоторых пачках  они должны быть уникальны то есть не могут быть одновременно, PackCreate самый уникальный 
+
+canMutate (packId, type, value): boolean {
+	ишем в остальных пачках поле и удаляем из них
+} 
+
+-------------------------------------
+private _canAdd()
+
+?canAdd : boolean (?canMutate)
+?preAdd : void
+?postAdd : void
+
+private _canDelete()
+
+?canDelete : boolean (?canMutate)
+?preDelete : void
+?postDelete : void
+
+private _canChange()
+
+?canChange : boolean (?canMutate)
+?preChange : void
+?postChange : void
+-------------------------------------
+
+// 1 способ решения проблемы
+Добавляем в контролеер preAdd который будет удалять это item у всех вложенных
+
+// 2 способ решения проблемы
+При включим двусторюнюю связ со всеми Pack, и поставим прослушку на добавление дочерних, если что то добавить в дочерние мы это удалим у себя
+
+
+
+
+// Как отправлять
+Ставим обработчик на состояние 'Отправлено' - 
+
++ changeState (state: string, packId)
++ add(..., packId)
++ cha(..., packId)
++ add(..., packId)
+
+ 
+
+
+или через связи
+
+
+
+
