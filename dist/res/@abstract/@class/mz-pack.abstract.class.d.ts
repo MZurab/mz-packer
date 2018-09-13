@@ -1,0 +1,45 @@
+import { MzPackInterface } from "../@interface/mz-pack.interface";
+import { Subject } from "rxjs";
+import { MzState, MzInputOnChangeItem } from "../@type/common.type";
+import { MzItemTypeEnum } from "../@enum/common.enum";
+export declare abstract class MzPackAbstractClass implements MzPackInterface {
+    abstract id: string;
+    abstract storage: any;
+    state: string | null;
+    lastState: string | null;
+    allItems: {
+        id: string;
+        item: any;
+    }[];
+    getStateFromPack(newState?: string): MzState;
+    onAddItem$: Subject<MzInputOnChangeItem>;
+    onBindedAddItem$: Subject<MzInputOnChangeItem>;
+    canAddItem(id: string, item: any): Promise<boolean>;
+    preAddItem(id: string, item: any): Promise<void>;
+    addItem(id: string, item: any, callback?: (state: MzState, id: string, item: any) => void): Promise<void>;
+    postAddItem(id: string, item: any): Promise<void>;
+    onRemoveItem$: Subject<MzInputOnChangeItem>;
+    onBindedRemoveItem$: Subject<MzInputOnChangeItem>;
+    canRemoveItem(id: string, item?: any): Promise<boolean>;
+    preRemoveItem(id: string, item?: any): Promise<void>;
+    removeItem(id: string, item?: any): Promise<void>;
+    postRemoveItem(id: string, item: any): Promise<void>;
+    onChangeItem$: Subject<MzInputOnChangeItem>;
+    onBindedChangeItem$: Subject<MzInputOnChangeItem>;
+    canChangeItem(id: string, item: any): Promise<boolean>;
+    preChangeItem(id: string, item: any): Promise<void>;
+    changeItem(id: string, item: any): Promise<void>;
+    postChangeItem(id: string, item: any): Promise<void>;
+    onWriteItem$: any;
+    onBindedWriteItem$: any;
+    canWriteItem(id: string, item: any, typeChage: MzItemTypeEnum): Promise<boolean>;
+    preWriteItem(id: string, item: any, typeChage: MzItemTypeEnum): Promise<void>;
+    abstract writeItem(id: string, item: any, typeChage: MzItemTypeEnum, callback?: (state: MzState, id: string, item: any) => void): Promise<void>;
+    postWriteItem(id: string, item: any, typeChage: MzItemTypeEnum): Promise<void>;
+    onChangeState$: any;
+    onBindedChangeState$: any;
+    canChangeState(state: MzState): Promise<boolean>;
+    preChangeState(state: MzState): Promise<void>;
+    changeState(state: MzState): Promise<void>;
+    postChangeState(state: MzState): Promise<void>;
+}
