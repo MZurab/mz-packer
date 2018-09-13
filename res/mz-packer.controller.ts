@@ -19,28 +19,14 @@ export class MzPacker implements MzPackerInterface {
     public onChangeItem$: Subject<MzInputOnChangeItem> = new Subject();
     public onChangeStorage$: Subject<MzInputOnChangeStorage> = new Subject();
 
-    public async add (
-        id: string,
-        item: any,
-        packId?: string,
-        consistently: boolean = false,
-        callback?: (state: MzState, id: string, item: any) => void
-    ): Promise<void> {
-        let packs = this.getAllPacksOrPackByPackId(packId);
-        for (let pack of packs) {
-            if(!pack) break;
-            // add to pack
-            pack.add(id, item, callback);
 
-        }
-    }
 
-    public change (
+    public async change (
         id: string,
         item: any,
         packId?: string,
         consistently: boolean = false
-    ): void {
+    ): Promise<void> {
         let packs = this.getAllPacksOrPackByPackId(packId);
         for (let pack of packs) {
             pack && pack.change(id, item);
@@ -59,6 +45,93 @@ export class MzPacker implements MzPackerInterface {
         return packs;
     }
 
+
+    //@< CHANGE CHANGING
+        protected async canChangeItem (pack: MzPackInterface, id: string, item: any): Promise<boolean> {
+            return  pack.canChangeItem(id, item);
+        }
+
+        protected async preChangeItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
+            return pack.preChangeItem(id, item);
+        }
+
+        protected async postChangeItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
+            return pack.postChangeItem(id, item);
+        }
+
+        public async changeItem (
+            id: string,
+            item: any,
+            packId?: string,
+            consistently: boolean = false
+        ): Promise<void> {
+            let packs = this.getAllPacksOrPackByPackId(packId);
+            for (let pack of packs) {
+                if(!pack) break;
+                // add to pack
+                pack.changeItem(id, item, consistently);
+            }
+        }
+    //@> CHANGE CHANGING
+
+    //@< REMOVE CHANGING
+        protected async canRemoveItem (pack: MzPackInterface, id: string, item: any): Promise<boolean> {
+            return  pack.canRemoveItem(id, item );
+        }
+
+        protected async preRemoveItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
+            return pack.preRemoveItem(id, item);
+        }
+
+        protected async postRemoveItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
+            return pack.postRemoveItem(id, item);
+        }
+
+        public async removeItem (
+            id: string,
+            item: any,
+            packId?: string,
+            consistently: boolean = false
+        ): Promise<void> {
+            let packs = this.getAllPacksOrPackByPackId(packId);
+            for (let pack of packs) {
+                if(!pack) break;
+                // add to pack
+                pack.removeItem(id, item, consistently);
+            }
+        }
+    //@> REMOVE CHANGING
+
+    //@< ADD CHANGING
+        protected async canAddItem (pack: MzPackInterface, id: string, item: any,  consistently: boolean = false): Promise<boolean> {
+            return  pack.canAddItem(id, item, consistently);
+        }
+
+        protected async preAddItem (pack: MzPackInterface, id: string, item: any,  consistently: boolean = false): Promise<void> {
+            return pack.preAddItem(id, item, consistently);
+        }
+
+        protected async postAddItem (id: string, item: any, pack: MzPackInterface, consistently: boolean = false): Promise<void> {
+            return pack.postAddItem(id, item, consistently);
+        }
+
+        public async addItem (
+            id: string,
+            item: any,
+            packId?: string,
+            consistently: boolean = false,
+            callback?: (packId: string, state: MzState, id: string, item: any) => void
+        ): Promise<void> {
+            let packs = this.getAllPacksOrPackByPackId(packId);
+            for (let pack of packs) {
+                if(!pack) break;
+                // add to pack
+                pack.addItem(id, item, consistently, callback);
+
+            }
+        }
+    //@> ADD CHANGING
+
     //@< STATE CHANGING
         private getStateFromPack (pack: MzPackInterface, newState: string): MzState  {
             return {
@@ -66,6 +139,7 @@ export class MzPacker implements MzPackerInterface {
                 previous: pack.state
             }
         }
+
         private async changeStateByPack (pack: MzPackInterface, state: MzState) {
             if( await this.canChangeState(pack, state) ) {
                 await this.preChangeState(pack, state);
@@ -103,10 +177,15 @@ export class MzPacker implements MzPackerInterface {
         }
     //@> STATE CHANGING
 
-    public remove (packId: string, id: string, item: any, callback?: () => void): void {
+    public async remove (
+        id: string,
+        item: any,
+        packId?: string,
+        consistently: boolean = false
+    ): Promise<void> {
         let pack = this.getPackClassFromStorageOfPacks(packId);
         if (pack) {
-            pack.remove(id, item, callback);
+            pack.remove(id, item);
         }
     }
 

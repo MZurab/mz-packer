@@ -12,40 +12,40 @@ export interface MzPackInterface {
         onWriteItem$: Observable<MzInputWrite>;
         onBindedWriteItem$: Observable<MzInputWrite>;
 
-        canWrite (id: string, item: any, typeChage: MzItemTypeEnum): Promise<boolean>
-        preWrite (id: string, item: any, typeChage: MzItemTypeEnum): Promise<void>
-        write (id: string, item: any, typeChage: MzItemTypeEnum, callback?: (state: MzState, id: string, item: any) => void): Promise<void>
-        postWrite (id: string, item: any, typeChage: MzItemTypeEnum): Promise<void>
+        canWriteItem (id: string, item: any, typeChage: MzItemTypeEnum): Promise<boolean>
+        preWriteItem (id: string, item: any, typeChage: MzItemTypeEnum): Promise<void>
+        writeItem (id: string, item: any, typeChage: MzItemTypeEnum, callback?: (state: MzState, id: string, item: any) => void): Promise<void>
+        postWriteItem (id: string, item: any, typeChage: MzItemTypeEnum): Promise<void>
     //@< BLOCK FOR WRITE
 
     //@< BLOCK FOR ADD
         onAddItem$: Observable<MzInputAction>;
         onBindedAddItem$: Observable<MzInputAction>;
 
-        canAdd (id: string, item: any): Promise<boolean>
-        preAdd (id: string, item: any): Promise<void>
-        add (id: string, item: any, callback?: (state: MzState, id: string, item: any) => void): Promise<void>
-        postAdd (id: string, item: any): Promise<void>
+        canAddItem (id: string, item: any): Promise<boolean>
+        preAddItem (id: string, item: any): Promise<void>
+        addItem (id: string, item: any, callback?: (state: MzState, id: string, item: any) => void): Promise<void>
+        postAddItem (id: string, item: any): Promise<void>
     //@> BLOCK FOR ADD
 
     //@< BLOCK FOR REMOVE
         onRemoveItem$: Observable<MzInputAction>;
         onBindedRemoveItem$: Observable<MzInputAction>;
 
-        canRemove (id: string, item: any): Promise<boolean>
-        preRemove (id: string, item: any): Promise<void>
-        remove (id: string, item: any, callback?: (state: MzState, id: string, item: any) => void): Promise<void>
-        postRemove (id: string, item: any): Promise<void>
+        canRemoveItem (id: string, item: any): Promise<boolean>
+        preRemoveItem (id: string, item: any): Promise<void>
+        removeItem (id: string, item: any): Promise<void>
+        postRemoveItem (id: string, item: any): Promise<void>
     //@> BLOCK FOR REMOVE
 
     //@< BLOCK FOR CHANGE ITEM
         onChangeItem$: Observable<MzInputAction>;
         onBindedChangeItem$: Observable<MzInputAction>;
 
-        canChange (id: string, item: any): Promise<boolean>
-        preChange (id: string, item: any): Promise<void>
-        change (id: string, item: any, callback?: (state: MzState, id: string, item: any) => void): Promise<void>
-        postChange (id: string, item: any): Promise<void>
+        canChangeItem (id: string, item: any): Promise<boolean>
+        preChangeItem (id: string, item: any): Promise<void>
+        changeItem (id: string, item: any): Promise<void>
+        postChangeItem (id: string, item: any): Promise<void>
     //@> BLOCK FOR EDIT
 
     //@< BLOCK FOR STATE CHANGING
