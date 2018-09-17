@@ -1,18 +1,26 @@
-import {Subject, Subscription} from "rxjs";
+import {Subject, Subscription, merge, Observable} from "rxjs";
 
 import {MzPackerInterface} from "./@abstract/@interface/mz-packer.interface";
 import {
     MzInputOnChangeItem,
     MzInputOnChangeState,
     MzInputOnChangeStorage, MzState,
-    MzStorageOfPacks
+    MzStorageOfPacksType,
+    MzSubscriptionsOfPackerType
 } from "./@abstract/@type/common.type";
 import {MzPackInterface} from "./@abstract/@interface/mz-pack.interface";
 import {MzItemTypeEnum} from "./@abstract/@enum/common.enum";
 
 export class MzPacker implements MzPackerInterface {
     public storage: any = {};
-    public storageOfPacks: MzStorageOfPacks = {};
+    public storageOfPacks: MzStorageOfPacksType = {};
+    public subscriptions: MzSubscriptionsOfPackerType = {
+        onAddItem       : [],
+        onWriteItem     : [],
+        onChangeItem    : [],
+        onRemoveItem    : [],
+        onChangeState   : [],
+    };
 
     private subscriptionsOnChangeState$: Subscription[] = [];
 
@@ -31,23 +39,20 @@ export class MzPacker implements MzPackerInterface {
     }
 
 
-    //@< CHANGE CHANGING
-        public readonly onChangeItem$: Subject<MzInputOnChangeItem> = new Subject();
+    //@< CHANGE ITEM
+        // @ts-ignore
+        public onChangeItem$: Observable<MzInputOnChangeItem>;
 
         async canChangeItem (pack: MzPackInterface, id: string, item: any): Promise<boolean> {
-            return  pack.canChangeItem(id, item);
+            return  pack.canChangeItem(id, item, pack.id);
         }
         
-        // async _preChangeItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
-        //    
-        // }
-        
         async preChangeItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
-            return pack.preChangeItem(id, item);
+            return pack.preChangeItem(id, item, pack.id);
         }
 
         async postChangeItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
-            return pack.postChangeItem(id, item);
+            return pack.postChangeItem(id, item, pack.id);
         }
 
         public async changeItem (
@@ -62,38 +67,27 @@ export class MzPacker implements MzPackerInterface {
                 if (!pack) break;
 
                 if (consistently)
-                    await pack.changeItem(id, item);
+                    await pack.changeItem(id, item, pack.id);
                 else
-                    pack.changeItem(id, item);
-
-                // emit all sub
-                this.onChangeItem$.next(
-                    {
-                        packId: packId,
-                        state: this.getStateFromPack(pack),
-                        storage: pack.storage,
-                        item: item,
-                        id: id,
-                        type: MzItemTypeEnum.change
-                    }
-                )
+                    pack.changeItem(id, item, pack.id);
             }
         }
-    //@> CHANGE CHANGING
+    //@> CHANGE ITEM
 
-    //@< REMOVE CHANGING
-        public readonly onRemoveItem$: Subject<MzInputOnChangeItem> = new Subject();
+    //@< REMOVE ITEM
+        // @ts-ignore
+        public onRemoveItem$: Observable<MzInputOnChangeItem>;
 
-        async canRemoveItem (pack: MzPackInterface, id: string, item: any): Promise<boolean> {
-            return  pack.canRemoveItem(id, item );
+        async canRemoveItem (pack: MzPackInterface, id: string, item?: any): Promise<boolean> {
+            return  pack.canRemoveItem(id, item, pack.id );
         }
 
-        async preRemoveItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
-            return pack.preRemoveItem(id, item);
+        async preRemoveItem (pack: MzPackInterface, id: string, item?: any): Promise<void> {
+            return pack.preRemoveItem(id, item, pack.id);
         }
 
-        async postRemoveItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
-            return pack.postRemoveItem(id, item);
+        async postRemoveItem (pack: MzPackInterface, id: string, item?: any): Promise<void> {
+            return pack.postRemoveItem(id, item, pack.id);
         }
         
         public async removeItem (
@@ -108,38 +102,27 @@ export class MzPacker implements MzPackerInterface {
                 if (!pack) break;
     
                 if (consistently)
-                    await pack.removeItem(id, item);
+                    await pack.removeItem(id, item, pack.id);
                 else
-                    pack.removeItem(id, item);
-
-                // emit
-                this.onRemoveItem$.next(
-                    {
-                        packId: packId,
-                        state: this.getStateFromPack(pack),
-                        storage: pack.storage,
-                        item: item,
-                        id: id,
-                        type: MzItemTypeEnum.change
-                    }
-                )
+                    pack.removeItem(id, item, pack.id);
             }
         }
-    //@> REMOVE CHANGING
+    //@> REMOVE ITEM
 
-    //@< ADD CHANGING
-        public readonly onAddItem$: Subject<MzInputOnChangeItem> = new Subject();
+    //@< ADD ITEM
+        // @ts-ignore
+        public onAddItem$: Observable<MzInputOnChangeItem>;
 
         async canAddItem (pack: MzPackInterface, id: string, item: any): Promise<boolean> {
-            return  pack.canAddItem(id, item);
+            return  pack.canAddItem(id, item, pack.id,);
         }
 
         async preAddItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
-            return pack.preAddItem(id, item);
+            return pack.preAddItem(id, item, pack.id,);
         }
 
         async postAddItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
-            return pack.postAddItem(id, item);
+            return pack.postAddItem(id, item, pack.id,);
         }
 
         public async addItem (
@@ -158,7 +141,8 @@ export class MzPacker implements MzPackerInterface {
                     await // add to pack
                         pack.addItem(
                             id,
-                            item,
+                            item, 
+                            pack.id,
                             (state: MzState, id: string, item: any) => {
                                 if(typeof callback === 'function' && packId) callback( packId, state, id, item)
                             }
@@ -167,28 +151,89 @@ export class MzPacker implements MzPackerInterface {
                 // add to pack
                     pack.addItem(
                         id,
-                        item,
+                        item, 
+                        pack.id,
                         (state: MzState, id: string, item: any) => {
                             if(typeof callback === 'function' && packId) callback( packId, state, id, item)
                         }
                     );
-
-                this.onAddItem$.next(
-                    {
-                        packId: packId,
-                        state: this.getStateFromPack(pack),
-                        storage: pack.storage,
-                        item: item,
-                        id: id,
-                        type: MzItemTypeEnum.change
-                    }
-                )
             }
         }
-    //@> ADD CHANGING
+    //@> ADD ITEM
+
+    //@< WRITE ITEM
+        // @ts-ignore
+        public onWriteItem$: Observable<MzInputOnChangeItem>;
+
+        async canWriteItem (
+            pack: MzPackInterface,
+            id: string,
+            item: any,
+            typeChage: MzItemTypeEnum,
+        ): Promise<boolean> {
+            return  pack.canWriteItem(id, item, typeChage, pack.id);
+        }
+
+        async preWriteItem (
+            pack: MzPackInterface,
+            id: string,
+            item: any,
+            typeChage: MzItemTypeEnum,
+        ): Promise<void> {
+            return pack.preWriteItem(id, item, typeChage, pack.id);
+        }
+
+        async postWriteItem (
+            pack: MzPackInterface,
+            id: string,
+            item: any,
+            typeChage: MzItemTypeEnum,
+        ): Promise<void> {
+            return pack.postWriteItem(id, item, typeChage, pack.id);
+        }
+
+        public async writeItem (
+            id: string,
+            item: any,
+            typeChage: MzItemTypeEnum,
+            packId?: string,
+            consistently: boolean = false,
+            callback?: (packId: string, state: MzState, id: string, item: any) => void
+        ): Promise<void> {
+            let packs = this.getAllPacksOrPackByPackId(packId);
+            for (let pack of packs) {
+                //@guard - we have pack
+                if (!pack) break;
+
+                if (consistently)
+                    await // add to pack
+                        pack.writeItem(
+                            id,
+                            item,
+                            typeChage,
+                            pack.id,
+                            (state: MzState, id: string, item: any) => {
+                                if(typeof callback === 'function' && packId) callback( packId, state, id, item)
+                            }
+                        );
+                else
+                    // add to pack
+                    pack.writeItem(
+                        id,
+                        item,
+                        typeChage,
+                        pack.id,
+                        (state: MzState, id: string, item: any) => {
+                            if(typeof callback === 'function' && packId) callback( packId, state, id, item)
+                        }
+                    );
+            }
+        }
+    //@> WRITE ITEM
 
     //@< STATE CHANGING
-        public readonly onChangeState$: Subject<MzInputOnChangeState> = new Subject();
+        // @ts-ignore
+        public onChangeState$: Observable<MzInputOnChangeState>;
 
         private getStateFromPack (pack: MzPackInterface, newState?: string): MzState  {
             return pack.getStateFromPack(newState);
@@ -197,21 +242,21 @@ export class MzPacker implements MzPackerInterface {
         private async changeStateByPack (pack: MzPackInterface, state: MzState) {
             if ( await this.canChangeState(pack, state) ) {
                 await this.preChangeState(pack, state);
-                await pack.changeState(state);
+                await pack.changeState(state, pack.id);
                 await this.postChangeState(pack, state);
             }
         }
 
         async canChangeState (pack: MzPackInterface, state: MzState): Promise<boolean> {
-            return await pack.canChangeState(state);
+            return await pack.canChangeState(state, pack.id);
         }
 
         async preChangeState (pack: MzPackInterface, state: MzState): Promise<void> {
-            pack.preChangeState(state);
+            pack.preChangeState(state, pack.id);
         }
 
         async postChangeState (pack: MzPackInterface, state: MzState): Promise<void> {
-            pack.postChangeState(state);
+            pack.postChangeState(state, pack.id);
         }
 
         public async changeState (newState: string, packId: string, consistently: boolean = false): Promise<void> {
@@ -227,15 +272,6 @@ export class MzPacker implements MzPackerInterface {
                     await this.changeStateByPack(pack, state);
                 else
                     this.changeStateByPack(pack, state);
-
-                // emit all sub
-                this.onChangeState$.next(
-                    {
-                        packId: packId,
-                        state: this.getStateFromPack(pack),
-                        storage: pack.storage
-                    }
-                )
             }
         }
     //@> STATE CHANGING
@@ -251,28 +287,28 @@ export class MzPacker implements MzPackerInterface {
         }
     }
 
-    public addObserver (observerPackId: string,  observerablePackId: string): boolean {
-        let observerPack = this.getPackFromStorageOfPacks(observerPackId);
-        if (observerPack && Array.isArray(observerPack.observers)) {
-            observerPack.observers.push(observerablePackId);
-            return true;
-        }
+    public addObserver (packId: string,  forPackId: string): boolean {
+        // let observerPack = this.getPackFromStorageOfPacks(packId);
+        // if (observerPack && Array.isArray(observerPack.observers)) {
+        //     observerPack.observers.push(forPackId);
+        //     return true;
+        // }
         return false;
     }
 
     public removeObserver (observerPackId: string,  observerablePackId: string): boolean {
-        let observerPack = this.getPackFromStorageOfPacks(observerPackId);
-        if (observerPack && observerPack.observers.length > 0) {
-            let idx = observerPack.observers.indexOf(observerablePackId);
-            if (idx > -1) delete observerPack.observers[idx];
-            return true;
-        }
+        // let observerPack = this.getPackFromStorageOfPacks(observerPackId);
+        // if (observerPack && observerPack.observers.length > 0) {
+        //     let idx = observerPack.observers.indexOf(observerablePackId);
+        //     if (idx > -1) delete observerPack.observers[idx];
+        //     return true;
+        // }
         return false;
     }
 
     private getIdsOfObservers (observerPackId: string): string[] {
-        let observerPack = this.getPackFromStorageOfPacks(observerPackId);
-        return (observerPack) ? observerPack.observers : [];
+        // let observerPack = this.getPackFromStorageOfPacks(observerPackId);
+        return []; //(observerPack) ? observerPack.observers : [];
     }
 
     public removePack (...packIds: string[]): void {
@@ -306,49 +342,67 @@ export class MzPacker implements MzPackerInterface {
         if(this.storage[packId]) delete this.storage[packId];
     }
 
+    private groupSubscribers () {
+        let storageOfPacks  = this.storageOfPacks,
+            subscriptions   = this.subscriptions;
+        for ( let packId of Object.keys(storageOfPacks) ) {
+            // ge pack
+            let pack = storageOfPacks[packId] && storageOfPacks[packId].class;
+
+            if (pack) {
+                // add to array all subscriptions
+                subscriptions.onAddItem.push(pack.onAddItem$);
+                subscriptions.onChangeItem.push(pack.onChangeItem$);
+                subscriptions.onWriteItem.push(pack.onWriteItem$);
+                subscriptions.onRemoveItem.push(pack.onRemoveItem$);
+                subscriptions.onChangeState.push(pack.onChangeState$);
+            }
+        }
+
+    }
+    
+    private runProslushka () {
+            
+    }
+    
     // add pack with create initial data
     private subscribeToAllPack () {
         // unsubscribe for all changes
         this.unsubscribeToAllPack();
 
-        let storageOfPacks = this.storageOfPacks;
+        // group all flows -> merge all flows$ to one by type
+        this.groupSubscribers();
 
-        // subscribe to all current packs
-        for (let packId of Object.keys(storageOfPacks)) {
-            let subscription = storageOfPacks[packId].class.onChangeState$.subscribe (
-                (input) => {
-                    this.onChangeState$.next({...input, packId: packId});
-                }
-            );
-            // save subscriptions for can later unsubscribe
-            this.subscriptionsOnChangeState$.push(subscription)
-        }
+        let subscriptions = this.subscriptions,
+            storageOfPacks = this.storageOfPacks;
+
+        // merge  all back whitch early group to array
+        this.onAddItem$     = merge(subscriptions.onAddItem);
+        this.onRemoveItem$  = merge(subscriptions.onRemoveItem);
+        this.onChangeItem$  = merge(subscriptions.onChangeItem);
+        this.onChangeState$ = merge(subscriptions.onChangeState);
+        this.onWriteItem$   = merge(subscriptions.onWriteItem);
     }
 
     private unsubscribeToAllPack () {
-        let subscriptionsOnChangeState$ = this.subscriptionsOnChangeState$;
-        // save unsubscribe from all observables
-        if( Array.isArray(subscriptionsOnChangeState$) ) {
-            for (let observable of subscriptionsOnChangeState$) {
-                observable.unsubscribe();
-            }
+        let subscriptions   = this.subscriptions;
+
+        for ( let subtypeKey of Object.keys(subscriptions) ) {
+            // @ts-ignore - get array with subscriptions -> clear
+            let arrWithSubsctiptions = subscriptions[subtypeKey];
+
+            // @ts-ignore - clear with unsubscribe
+            this.subscriptions[subtypeKey] = arrWithSubsctiptions.filter(
+                (flow$: any) => flow$ && flow$.unsubscribe() && false
+            )
         }
-        // clear array
-        subscriptionsOnChangeState$ = [];
     }
 
     // add pack with create initial data
     private addPackToLocalStorageOfPacks (pack: MzPackInterface) {
         this.storageOfPacks[pack.id] = {
             class: pack,
-            observers: [],
-            subscriptions: {
-                onChangeItem: [],
-                onWriteItem: [],
-                onAddItem: [],
-                onRemoveItem: [],
-                onChangeState: [],
-            }
+            bindingPacks: []
         };
     }
     
@@ -357,32 +411,32 @@ export class MzPacker implements MzPackerInterface {
     }
 
     constructor () {
-        this.onChangeItem$.subscribe(
-            (item) => {
-                // start item emitter
-                // invoke all bindend emiter
-            }
-        );
-
-        this.onChangeState$.subscribe(
-            (item) => {
-                // start item emitter
-
-            }
-        );
-
-        this.onRemoveItem$.subscribe(
-            () => {
-                // start item emitter
-
-            }
-        );
-
-        this.onAddItem$.subscribe(
-            (item) => {
-                // start item emitter
-
-            }
-        );
+        // this.onChangeItem$.subscribe(
+        //     (item) => {
+        //         // start item emitter
+        //         // invoke all bindend emiter
+        //     }
+        // );
+        //
+        // this.onChangeState$.subscribe(
+        // (item) => {
+        // // start item emitter
+        // //
+        // //     }
+        // // );
+        //
+        // this.onRemoveItem$.subscribe(
+        //     () => {
+        //         // start item emitter
+        //
+        //     }
+        // );
+        //
+        // this.onAddItem$.subscribe(
+        //     (item) => {
+        //         // start item emitter
+        //
+        //     }
+        // );
     }
 }

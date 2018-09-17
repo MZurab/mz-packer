@@ -1,10 +1,17 @@
 import { MzPackInterface } from "../@interface/mz-pack.interface";
 import { MzItemTypeEnum } from "../@enum/common.enum";
-export declare type MzStorageOfPacks = {
+export declare type MzStorageOfPacksType = {
     [s: string]: {
         class: MzPackInterface;
-        observers: string[];
+        bindingPacks: string[];
     };
+};
+export declare type MzSubscriptionsOfPackerType = {
+    onAddItem: any[];
+    onWriteItem: any[];
+    onChangeItem: any[];
+    onRemoveItem: any[];
+    onChangeState: any[];
 };
 export declare type MzState = {
     current: string | null;
@@ -22,6 +29,12 @@ export declare type MzInputOnChangeItem = {
     item: any;
     id: any;
     type: MzItemTypeEnum;
+};
+export declare type MzInputOnEmitType = {
+    packId: string;
+    state: MzState;
+    storage: any;
+    data: any;
 };
 export declare type MzInputOnAddItem = {
     packId?: string;

@@ -36,37 +36,46 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var rxjs_1 = require("rxjs");
-var common_enum_1 = require("./@abstract/@enum/common.enum");
 var MzPacker = /** @class */ (function () {
     function MzPacker() {
         this.storage = {};
         this.storageOfPacks = {};
+        this.subscriptions = {
+            onAddItem: [],
+            onWriteItem: [],
+            onChangeItem: [],
+            onRemoveItem: [],
+            onChangeState: [],
+        };
         this.subscriptionsOnChangeState$ = [];
         this.onChangeStorage$ = new rxjs_1.Subject();
-        //@< CHANGE CHANGING
-        this.onChangeItem$ = new rxjs_1.Subject();
-        //@> CHANGE CHANGING
-        //@< REMOVE CHANGING
-        this.onRemoveItem$ = new rxjs_1.Subject();
-        //@> REMOVE CHANGING
-        //@< ADD CHANGING
-        this.onAddItem$ = new rxjs_1.Subject();
-        //@> ADD CHANGING
-        //@< STATE CHANGING
-        this.onChangeState$ = new rxjs_1.Subject();
-        this.onChangeItem$.subscribe(function (item) {
-            // start item emitter
-            // invoke all bindend emiter
-        });
-        this.onChangeState$.subscribe(function (item) {
-            // start item emitter
-        });
-        this.onRemoveItem$.subscribe(function () {
-            // start item emitter
-        });
-        this.onAddItem$.subscribe(function (item) {
-            // start item emitter
-        });
+        // this.onChangeItem$.subscribe(
+        //     (item) => {
+        //         // start item emitter
+        //         // invoke all bindend emiter
+        //     }
+        // );
+        //
+        // this.onChangeState$.subscribe(
+        // (item) => {
+        // // start item emitter
+        // //
+        // //     }
+        // // );
+        //
+        // this.onRemoveItem$.subscribe(
+        //     () => {
+        //         // start item emitter
+        //
+        //     }
+        // );
+        //
+        // this.onAddItem$.subscribe(
+        //     (item) => {
+        //         // start item emitter
+        //
+        //     }
+        // );
     }
     MzPacker.prototype.getAllPacksOrPackByPackId = function (packId) {
         var packs = [];
@@ -82,24 +91,21 @@ var MzPacker = /** @class */ (function () {
     MzPacker.prototype.canChangeItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.canChangeItem(id, item)];
+                return [2 /*return*/, pack.canChangeItem(id, item, pack.id)];
             });
         });
     };
-    // async _preChangeItem (pack: MzPackInterface, id: string, item: any): Promise<void> {
-    //    
-    // }
     MzPacker.prototype.preChangeItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.preChangeItem(id, item)];
+                return [2 /*return*/, pack.preChangeItem(id, item, pack.id)];
             });
         });
     };
     MzPacker.prototype.postChangeItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.postChangeItem(id, item)];
+                return [2 /*return*/, pack.postChangeItem(id, item, pack.id)];
             });
         });
     };
@@ -114,34 +120,23 @@ var MzPacker = /** @class */ (function () {
                         _i = 0, packs_1 = packs;
                         _a.label = 1;
                     case 1:
-                        if (!(_i < packs_1.length)) return [3 /*break*/, 6];
+                        if (!(_i < packs_1.length)) return [3 /*break*/, 5];
                         pack = packs_1[_i];
                         //@guard - we have pack
                         if (!pack)
-                            return [3 /*break*/, 6];
+                            return [3 /*break*/, 5];
                         if (!consistently) return [3 /*break*/, 3];
-                        return [4 /*yield*/, pack.changeItem(id, item)];
+                        return [4 /*yield*/, pack.changeItem(id, item, pack.id)];
                     case 2:
                         _a.sent();
                         return [3 /*break*/, 4];
                     case 3:
-                        pack.changeItem(id, item);
+                        pack.changeItem(id, item, pack.id);
                         _a.label = 4;
                     case 4:
-                        // emit all sub
-                        this.onChangeItem$.next({
-                            packId: packId,
-                            state: this.getStateFromPack(pack),
-                            storage: pack.storage,
-                            item: item,
-                            id: id,
-                            type: common_enum_1.MzItemTypeEnum.change
-                        });
-                        _a.label = 5;
-                    case 5:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 6: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -149,21 +144,21 @@ var MzPacker = /** @class */ (function () {
     MzPacker.prototype.canRemoveItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.canRemoveItem(id, item)];
+                return [2 /*return*/, pack.canRemoveItem(id, item, pack.id)];
             });
         });
     };
     MzPacker.prototype.preRemoveItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.preRemoveItem(id, item)];
+                return [2 /*return*/, pack.preRemoveItem(id, item, pack.id)];
             });
         });
     };
     MzPacker.prototype.postRemoveItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.postRemoveItem(id, item)];
+                return [2 /*return*/, pack.postRemoveItem(id, item, pack.id)];
             });
         });
     };
@@ -178,34 +173,23 @@ var MzPacker = /** @class */ (function () {
                         _i = 0, packs_2 = packs;
                         _a.label = 1;
                     case 1:
-                        if (!(_i < packs_2.length)) return [3 /*break*/, 6];
+                        if (!(_i < packs_2.length)) return [3 /*break*/, 5];
                         pack = packs_2[_i];
                         //@guard - we have pack
                         if (!pack)
-                            return [3 /*break*/, 6];
+                            return [3 /*break*/, 5];
                         if (!consistently) return [3 /*break*/, 3];
-                        return [4 /*yield*/, pack.removeItem(id, item)];
+                        return [4 /*yield*/, pack.removeItem(id, item, pack.id)];
                     case 2:
                         _a.sent();
                         return [3 /*break*/, 4];
                     case 3:
-                        pack.removeItem(id, item);
+                        pack.removeItem(id, item, pack.id);
                         _a.label = 4;
                     case 4:
-                        // emit
-                        this.onRemoveItem$.next({
-                            packId: packId,
-                            state: this.getStateFromPack(pack),
-                            storage: pack.storage,
-                            item: item,
-                            id: id,
-                            type: common_enum_1.MzItemTypeEnum.change
-                        });
-                        _a.label = 5;
-                    case 5:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 6: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -213,21 +197,21 @@ var MzPacker = /** @class */ (function () {
     MzPacker.prototype.canAddItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.canAddItem(id, item)];
+                return [2 /*return*/, pack.canAddItem(id, item, pack.id)];
             });
         });
     };
     MzPacker.prototype.preAddItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.preAddItem(id, item)];
+                return [2 /*return*/, pack.preAddItem(id, item, pack.id)];
             });
         });
     };
     MzPacker.prototype.postAddItem = function (pack, id, item) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, pack.postAddItem(id, item)];
+                return [2 /*return*/, pack.postAddItem(id, item, pack.id)];
             });
         });
     };
@@ -242,14 +226,14 @@ var MzPacker = /** @class */ (function () {
                         _i = 0, packs_3 = packs;
                         _a.label = 1;
                     case 1:
-                        if (!(_i < packs_3.length)) return [3 /*break*/, 6];
+                        if (!(_i < packs_3.length)) return [3 /*break*/, 5];
                         pack = packs_3[_i];
                         //@guard - we have pack
                         if (!pack)
-                            return [3 /*break*/, 6];
+                            return [3 /*break*/, 5];
                         if (!consistently) return [3 /*break*/, 3];
                         return [4 /*yield*/, // add to pack
-                            pack.addItem(id, item, function (state, id, item) {
+                            pack.addItem(id, item, pack.id, function (state, id, item) {
                                 if (typeof callback === 'function' && packId)
                                     callback(packId, state, id, item);
                             })];
@@ -258,25 +242,76 @@ var MzPacker = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         // add to pack
-                        pack.addItem(id, item, function (state, id, item) {
+                        pack.addItem(id, item, pack.id, function (state, id, item) {
                             if (typeof callback === 'function' && packId)
                                 callback(packId, state, id, item);
                         });
                         _a.label = 4;
                     case 4:
-                        this.onAddItem$.next({
-                            packId: packId,
-                            state: this.getStateFromPack(pack),
-                            storage: pack.storage,
-                            item: item,
-                            id: id,
-                            type: common_enum_1.MzItemTypeEnum.change
-                        });
-                        _a.label = 5;
-                    case 5:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 6: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    MzPacker.prototype.canWriteItem = function (pack, id, item, typeChage) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, pack.canWriteItem(id, item, typeChage, pack.id)];
+            });
+        });
+    };
+    MzPacker.prototype.preWriteItem = function (pack, id, item, typeChage) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, pack.preWriteItem(id, item, typeChage, pack.id)];
+            });
+        });
+    };
+    MzPacker.prototype.postWriteItem = function (pack, id, item, typeChage) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, pack.postWriteItem(id, item, typeChage, pack.id)];
+            });
+        });
+    };
+    MzPacker.prototype.writeItem = function (id, item, typeChage, packId, consistently, callback) {
+        if (consistently === void 0) { consistently = false; }
+        return __awaiter(this, void 0, void 0, function () {
+            var packs, _i, packs_4, pack;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        packs = this.getAllPacksOrPackByPackId(packId);
+                        _i = 0, packs_4 = packs;
+                        _a.label = 1;
+                    case 1:
+                        if (!(_i < packs_4.length)) return [3 /*break*/, 5];
+                        pack = packs_4[_i];
+                        //@guard - we have pack
+                        if (!pack)
+                            return [3 /*break*/, 5];
+                        if (!consistently) return [3 /*break*/, 3];
+                        return [4 /*yield*/, // add to pack
+                            pack.writeItem(id, item, typeChage, pack.id, function (state, id, item) {
+                                if (typeof callback === 'function' && packId)
+                                    callback(packId, state, id, item);
+                            })];
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        // add to pack
+                        pack.writeItem(id, item, typeChage, pack.id, function (state, id, item) {
+                            if (typeof callback === 'function' && packId)
+                                callback(packId, state, id, item);
+                        });
+                        _a.label = 4;
+                    case 4:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -294,7 +329,7 @@ var MzPacker = /** @class */ (function () {
                         return [4 /*yield*/, this.preChangeState(pack, state)];
                     case 2:
                         _a.sent();
-                        return [4 /*yield*/, pack.changeState(state)];
+                        return [4 /*yield*/, pack.changeState(state, pack.id)];
                     case 3:
                         _a.sent();
                         return [4 /*yield*/, this.postChangeState(pack, state)];
@@ -310,7 +345,7 @@ var MzPacker = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, pack.canChangeState(state)];
+                    case 0: return [4 /*yield*/, pack.canChangeState(state, pack.id)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -319,7 +354,7 @@ var MzPacker = /** @class */ (function () {
     MzPacker.prototype.preChangeState = function (pack, state) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                pack.preChangeState(state);
+                pack.preChangeState(state, pack.id);
                 return [2 /*return*/];
             });
         });
@@ -327,7 +362,7 @@ var MzPacker = /** @class */ (function () {
     MzPacker.prototype.postChangeState = function (pack, state) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                pack.postChangeState(state);
+                pack.postChangeState(state, pack.id);
                 return [2 /*return*/];
             });
         });
@@ -335,19 +370,19 @@ var MzPacker = /** @class */ (function () {
     MzPacker.prototype.changeState = function (newState, packId, consistently) {
         if (consistently === void 0) { consistently = false; }
         return __awaiter(this, void 0, void 0, function () {
-            var packs, _i, packs_4, pack, state;
+            var packs, _i, packs_5, pack, state;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         packs = this.getAllPacksOrPackByPackId(packId);
-                        _i = 0, packs_4 = packs;
+                        _i = 0, packs_5 = packs;
                         _a.label = 1;
                     case 1:
-                        if (!(_i < packs_4.length)) return [3 /*break*/, 6];
-                        pack = packs_4[_i];
+                        if (!(_i < packs_5.length)) return [3 /*break*/, 5];
+                        pack = packs_5[_i];
                         //@guard - we have pack
                         if (!pack)
-                            return [3 /*break*/, 6];
+                            return [3 /*break*/, 5];
                         state = this.getStateFromPack(pack, newState);
                         if (!consistently) return [3 /*break*/, 3];
                         return [4 /*yield*/, this.changeStateByPack(pack, state)];
@@ -358,17 +393,9 @@ var MzPacker = /** @class */ (function () {
                         this.changeStateByPack(pack, state);
                         _a.label = 4;
                     case 4:
-                        // emit all sub
-                        this.onChangeState$.next({
-                            packId: packId,
-                            state: this.getStateFromPack(pack),
-                            storage: pack.storage
-                        });
-                        _a.label = 5;
-                    case 5:
                         _i++;
                         return [3 /*break*/, 1];
-                    case 6: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -381,33 +408,32 @@ var MzPacker = /** @class */ (function () {
         }
         if (!Array.isArray(packs) || packs.length === 0)
             return;
-        for (var _a = 0, packs_5 = packs; _a < packs_5.length; _a++) {
-            var pack = packs_5[_a];
+        for (var _a = 0, packs_6 = packs; _a < packs_6.length; _a++) {
+            var pack = packs_6[_a];
             this.addStorageOfPack(pack);
             this.addPackToLocalStorageOfPacks(pack);
         }
     };
-    MzPacker.prototype.addObserver = function (observerPackId, observerablePackId) {
-        var observerPack = this.getPackFromStorageOfPacks(observerPackId);
-        if (observerPack && Array.isArray(observerPack.observers)) {
-            observerPack.observers.push(observerablePackId);
-            return true;
-        }
+    MzPacker.prototype.addObserver = function (packId, forPackId) {
+        // let observerPack = this.getPackFromStorageOfPacks(packId);
+        // if (observerPack && Array.isArray(observerPack.observers)) {
+        //     observerPack.observers.push(forPackId);
+        //     return true;
+        // }
         return false;
     };
     MzPacker.prototype.removeObserver = function (observerPackId, observerablePackId) {
-        var observerPack = this.getPackFromStorageOfPacks(observerPackId);
-        if (observerPack && observerPack.observers.length > 0) {
-            var idx = observerPack.observers.indexOf(observerablePackId);
-            if (idx > -1)
-                delete observerPack.observers[idx];
-            return true;
-        }
+        // let observerPack = this.getPackFromStorageOfPacks(observerPackId);
+        // if (observerPack && observerPack.observers.length > 0) {
+        //     let idx = observerPack.observers.indexOf(observerablePackId);
+        //     if (idx > -1) delete observerPack.observers[idx];
+        //     return true;
+        // }
         return false;
     };
     MzPacker.prototype.getIdsOfObservers = function (observerPackId) {
-        var observerPack = this.getPackFromStorageOfPacks(observerPackId);
-        return (observerPack) ? observerPack.observers : [];
+        // let observerPack = this.getPackFromStorageOfPacks(observerPackId);
+        return []; //(observerPack) ? observerPack.observers : [];
     };
     MzPacker.prototype.removePack = function () {
         var packIds = [];
@@ -444,40 +470,53 @@ var MzPacker = /** @class */ (function () {
         if (this.storage[packId])
             delete this.storage[packId];
     };
+    MzPacker.prototype.groupSubscribers = function () {
+        var storageOfPacks = this.storageOfPacks, subscriptions = this.subscriptions;
+        for (var _i = 0, _a = Object.keys(storageOfPacks); _i < _a.length; _i++) {
+            var packId = _a[_i];
+            // ge pack
+            var pack = storageOfPacks[packId] && storageOfPacks[packId].class;
+            if (pack) {
+                // add to array all subscriptions
+                subscriptions.onAddItem.push(pack.onAddItem$);
+                subscriptions.onChangeItem.push(pack.onChangeItem$);
+                subscriptions.onWriteItem.push(pack.onWriteItem$);
+                subscriptions.onRemoveItem.push(pack.onRemoveItem$);
+                subscriptions.onChangeState.push(pack.onChangeState$);
+            }
+        }
+    };
+    MzPacker.prototype.runProslushka = function () {
+    };
     // add pack with create initial data
     MzPacker.prototype.subscribeToAllPack = function () {
-        // // unsubscribe for all changes
-        // this.unsubscribeToAllPack();
-        //
-        // let storageOfPacks = this.storageOfPacks;
-        //
-        // // subscribe to all current packs
-        // for (let packId of Object.keys(storageOfPacks)) {
-        //     let subscription = storageOfPacks[packId].class.onChangeState$.subscribe (
-        //         (input) => {
-        //             this.onChangeState$.next({...input, packId: packId});
-        //         }
-        //     );
-        //     // save subscriptions for can later unsubscribe
-        //     this.subscriptionsOnChangeState$.push(subscription)
-        // }
+        // unsubscribe for all changes
+        this.unsubscribeToAllPack();
+        // group all flows -> merge all flows$ to one by type
+        this.groupSubscribers();
+        var subscriptions = this.subscriptions, storageOfPacks = this.storageOfPacks;
+        // merge  all back whitch early group to array
+        this.onAddItem$ = rxjs_1.merge(subscriptions.onAddItem);
+        this.onRemoveItem$ = rxjs_1.merge(subscriptions.onRemoveItem);
+        this.onChangeItem$ = rxjs_1.merge(subscriptions.onChangeItem);
+        this.onChangeState$ = rxjs_1.merge(subscriptions.onChangeState);
+        this.onWriteItem$ = rxjs_1.merge(subscriptions.onWriteItem);
     };
     MzPacker.prototype.unsubscribeToAllPack = function () {
-        // let subscriptionsOnChangeState$ = this.subscriptionsOnChangeState$;
-        // // save unsubscribe from all observables
-        // if( Array.isArray(subscriptionsOnChangeState$) ) {
-        //     for (let observable of subscriptionsOnChangeState$) {
-        //         observable.unsubscribe();
-        //     }
-        // }
-        // // clear array
-        // subscriptionsOnChangeState$ = [];
+        var subscriptions = this.subscriptions;
+        for (var _i = 0, _a = Object.keys(subscriptions); _i < _a.length; _i++) {
+            var subtypeKey = _a[_i];
+            // @ts-ignore - get array with subscriptions -> clear
+            var arrWithSubsctiptions = subscriptions[subtypeKey];
+            // @ts-ignore - clear with unsubscribe
+            this.subscriptions[subtypeKey] = arrWithSubsctiptions.filter(function (flow$) { return flow$ && flow$.unsubscribe() && false; });
+        }
     };
     // add pack with create initial data
     MzPacker.prototype.addPackToLocalStorageOfPacks = function (pack) {
         this.storageOfPacks[pack.id] = {
             class: pack,
-            observers: []
+            bindingPacks: []
         };
     };
     MzPacker.prototype.removePackToLocalStorageOfPacks = function (packId) {

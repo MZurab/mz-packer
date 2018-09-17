@@ -1,6 +1,7 @@
 import {MzPackInterface} from "./mz-pack.interface";
 import {MzState, MzInputOnAddItem, MzInputOnChangeItem, MzInputOnChangeState} from "../@type/common.type";
-import {Subject} from "rxjs";
+import {Observable} from "rxjs";
+import {MzItemTypeEnum} from "../@enum/common.enum";
 
 export interface MzPackControllerInterface {
     //@< BLOCK FOR ADD ITEM
@@ -27,39 +28,36 @@ export interface MzPackControllerInterface {
         canChangeItem (
             pack: MzPackInterface,
             id: string,
-            state: MzState
+            item: any
         ): Promise<boolean>
 
         preChangeItem (
             pack: MzPackInterface,
             id: string,
-            consistently?: boolean
+            item: any
         ): Promise<void>
 
         postChangeItem (
             pack: MzPackInterface,
             id: string,
-            consistently?: boolean
+            item: any
         ): Promise<void>
     //@> BLOCK FOR CHANGE ITEM
 
     //@< BLOCK FOR REMOVE ITEM
         canRemoveItem (
             pack: MzPackInterface,
-            id: string,
-            state: MzState
+            id: string
         ): Promise<boolean>
 
         preRemoveItem (
             pack: MzPackInterface,
-            id: string,
-            consistently?: boolean
+            id: string
         ): Promise<void>
 
         postRemoveItem (
             pack: MzPackInterface,
-            id: string,
-            consistently?: boolean
+            id: string
         ): Promise<void>
     //@> BLOCK FOR REMOVE ITEM
 
@@ -79,6 +77,29 @@ export interface MzPackControllerInterface {
             state: MzState
         ): Promise<void>
     //@> BLOCK FOR CHANGE STATE
+
+    //@< BLOCK FOR WRITE ITEM
+        canWriteItem (
+            pack: MzPackInterface,
+            id: string,
+            item: any,
+            typeChage: MzItemTypeEnum
+        ): Promise<boolean>
+    
+        preWriteItem (
+            pack: MzPackInterface,
+            id: string,
+            item: any,
+            typeChage: MzItemTypeEnum
+        ): Promise<void>
+    
+        postWriteItem (
+            pack: MzPackInterface,
+            id: string,
+            item: any,
+            typeChage: MzItemTypeEnum
+        ): Promise<void>
+    //@> BLOCK FOR WRITE ITEM - 
 }
 
 export interface MzPackerInterface extends MzPackControllerInterface {
@@ -87,7 +108,7 @@ export interface MzPackerInterface extends MzPackControllerInterface {
     addPack(...pack: MzPackInterface[]): void
 
     //@< BLOCK FOR ADD ITEM
-        onAddItem$: Subject<MzInputOnChangeItem>
+        onAddItem$: Observable<MzInputOnChangeItem>
 
         addItem (
             id: string,
@@ -99,31 +120,49 @@ export interface MzPackerInterface extends MzPackControllerInterface {
     //@> BLOCK FOR ADD ITEM
 
     //@< BLOCK FOR CHANGE ITEM
-        onChangeItem$: Subject<MzInputOnChangeItem>
+        onChangeItem$: Observable<MzInputOnChangeItem>
     
         changeItem (
             id: string,
+            item: any,
             packId?: string,
-            item?: any,
             consistently?: boolean
         ): Promise<void>
 
     //@> BLOCK FOR CHANGE ITEM
+
+    //@< BLOCK FOR WRITE ITEM
+        onWriteItem$: Observable<MzInputOnChangeItem>
+    
+        writeItem (
+            id: string,
+            item: any,
+            typeChage: MzItemTypeEnum,
+            packId?: string,
+            consistently?: boolean,
+            callback?: (packId: string, state: MzState, id: string, item: any) => void
+        ): Promise<void>
+
+    //@> BLOCK FOR WRITE ITEM
     
     //@< BLOCK FOR REMOVE ITEM
-        onRemoveItem$: Subject<MzInputOnChangeItem>
+        onRemoveItem$: Observable<MzInputOnChangeItem>
 
         removeItem (
             id: string,
-            packId?: string,
             item?: any,
+            packId?: string,
             consistently?: boolean
         ): Promise<void>
     //@> BLOCK FOR REMOVE ITEM
 
     //@< BLOCK FOR CHANGE STATE
-        onChangeState$: Subject<MzInputOnChangeState>;
+        onChangeState$: Observable<MzInputOnChangeState>;
     
-        changeState (newState: string, packId: string, consistently?: boolean): Promise<void>
+        changeState (
+            newState: string, 
+            packId: string, 
+            consistently?: boolean
+        ): Promise<void>
     //@> BLOCK FOR CHANGE STATE
 }

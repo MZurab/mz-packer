@@ -1,11 +1,22 @@
 import {MzPackInterface} from "../@interface/mz-pack.interface";
 import {MzItemTypeEnum} from "../@enum/common.enum";
 
-export type MzStorageOfPacks = {
+export type MzStorageOfPacksType = {
     [s: string]: {
+        // will be reference to pack objects
         class: MzPackInterface,
-        observers: string[]
+        // will be pack ids array
+        bindingPacks: string[] 
     }
+}
+
+export type MzSubscriptionsOfPackerType = {
+    onAddItem: any[],
+    onWriteItem: any[],
+    onChangeItem: any[],
+    onRemoveItem: any[],
+
+    onChangeState: any[],
 }
 
 export type MzState = {
@@ -27,6 +38,15 @@ export type MzInputOnChangeItem = {
     id: any,
     type: MzItemTypeEnum
 }
+
+export type MzInputOnEmitType = {
+    packId: string,
+    state: MzState,
+    storage: any,
+    data: any
+}
+
+
 
 export type MzInputOnAddItem = {
     packId?: string,
